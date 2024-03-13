@@ -3,7 +3,8 @@ const {
     isValidName, 
     isValidDecimalFormat, 
     checkAssociatedCustomer, 
-    checkProductsArray 
+    checkProductsArray,
+    isValidEmail
 } = require('./middlewares');
 
 module.exports = {
@@ -11,5 +12,6 @@ module.exports = {
     isValidName,
     isValidDecimalFormat,
     checkAssociatedCustomer,
-    checkProductsArray
+    checkProductsArray,
+    isValidEmail
 }

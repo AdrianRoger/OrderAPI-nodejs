@@ -66,8 +66,8 @@ const checkAssociatedCustomer = (req, res, next) => {
 const checkProductsArray = (req, res, next) => {
     const { items } = req.body;
 
-    if(!items){
-        return res.json({error : "O atributo items é obrigatório"});
+    if (!items) {
+        return res.json({ error: "O atributo items é obrigatório" });
     }
 
     if (!Array.isArray(items)) {
@@ -93,10 +93,27 @@ const checkProductsArray = (req, res, next) => {
     next();
 }
 
+const isValidEmail = (req, res, next) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.json({ error: "O atributo email deve existir." });
+    }
+
+    const emailRegex = /^[^\s@]{3,}@[^@]{3,}\.[^\s@]{2,3}$/;
+
+    if (!emailRegex.test(email)) {
+        return res.json({ error: 'O e-mail informado não está em um formato válido.' });
+    }
+
+    next();
+}
+
 module.exports = {
     isInteger,
     isValidName,
     isValidDecimalFormat,
     checkAssociatedCustomer,
-    checkProductsArray
+    checkProductsArray,
+    isValidEmail
 };
