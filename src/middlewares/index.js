@@ -7,11 +7,14 @@ const {
     isValidEmail
 } = require('./middlewares');
 
+const frameGuardMiddleware  = require('./frameGuardMiddleware');
+
 module.exports = {
     isInteger,
     isValidName,
     isValidDecimalFormat,
     checkAssociatedCustomer,
     checkProductsArray,
-    isValidEmail
+    isValidEmail,
+    frameGuardMiddleware
 }
