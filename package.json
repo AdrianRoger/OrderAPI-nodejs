@@ -1,5 +1,5 @@
 {
-  "name": "q1-product-api",
+  "name": "q1-productorder-api",
   "version": "1.0.0",
   "description": "Product API",
   "main": "src/app.js",
