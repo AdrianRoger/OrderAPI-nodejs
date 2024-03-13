@@ -5,7 +5,7 @@ const isInteger = (req, res, next) => {
     const id = req.params.id;
 
     if (!/^\d+$/.test(id)) {
-        return res.json({ error: "O id dev ser um número inteiro" });
+        return res.status(400).json({ error: "O id dev ser um número inteiro" });
     }
 
     next();
@@ -15,12 +15,12 @@ const isValidName = (req, res, next) => {
     const { name } = req.body;
 
     if (!name) {
-        return res.json({ error: 'O atributo name é obrigatório.' });
+        return res.status(400).json({ error: 'O atributo name é obrigatório.' });
     }
 
     const trimmedName = name.trim();
     if (trimmedName.length < 3) {
-        return res.json({ error: 'O atributo name deve ter pelo menos 3 caracteres.' });
+        return res.status(400).json({ error: 'O atributo name deve ter pelo menos 3 caracteres.' });
     }
 
     next();
@@ -30,7 +30,7 @@ const isValidDecimalFormat = (req, res, next) => {
     const { value } = req.body;
 
     if (!value) {
-        return res.json({ error: 'O atributo value é obrigatório.' });
+        return res.status(400).json({ error: 'O atributo value é obrigatório.' });
     }
 
     if (value === undefined || isNaN(value)) {
@@ -52,12 +52,12 @@ const checkAssociatedCustomer = (req, res, next) => {
     const { customer } = req.body;
 
     if (!customer) {
-        return res.json({ error: "O atributo customer é obrigatório." });
+        return res.status(400).json({ error: "O atributo customer é obrigatório." });
     }
 
     const customerIndex = customers.findIndex(cus => cus.id === customer);
     if (customerIndex === -1) {
-        return res.json({ error: "Cliente não cadastrado" });
+        return res.status(422).json({ error: "Cliente não cadastrado" });
     }
 
     next();
@@ -67,15 +67,15 @@ const checkProductsArray = (req, res, next) => {
     const { items } = req.body;
 
     if (!items) {
-        return res.json({ error: "O atributo items é obrigatório" });
+        return res.status(400).json({ error: "O atributo items é obrigatório" });
     }
 
     if (!Array.isArray(items)) {
-        return res.json({ error: 'O atributo items deve ser um array.' });
+        return res.status(400).json({ error: 'O atributo items deve ser um array.' });
     }
 
     if (items.length === 0) {
-        return res.json({ error: "O pedido deve conter pelo menos 1 item." });
+        return res.status(400).json({ error: "O pedido deve conter pelo menos 1 item." });
     }
 
     const nonExistingProducts = [];
@@ -87,7 +87,7 @@ const checkProductsArray = (req, res, next) => {
     });
 
     if (nonExistingProducts.length > 0) {
-        return res.json({ error: `Produtos com IDs ${nonExistingProducts.join(',')} não cadastrados.` });
+        return res.status(422).json({ error: `Produtos com IDs ${nonExistingProducts.join(',')} não cadastrados.` });
     }
 
     next();
@@ -97,13 +97,13 @@ const isValidEmail = (req, res, next) => {
     const { email } = req.body;
 
     if (!email) {
-        return res.json({ error: "O atributo email deve existir." });
+        return res.status(400).json({ error: "O atributo email deve existir." });
     }
 
     const emailRegex = /^[^\s@]{3,}@[^@]{3,}\.[^\s@]{2,3}$/;
 
     if (!emailRegex.test(email)) {
-        return res.json({ error: 'O e-mail informado não está em um formato válido.' });
+        return res.status(400).json({ error: 'O e-mail informado não está em um formato válido.' });
     }
 
     next();

@@ -9,7 +9,7 @@ let products = [
 let nextId = products.length + 1;
 
 const getAllProducts = (req, res) => {
-    res.json(products);
+    res.status(200).json(products);
 }
 
 const getProduct = (req, res) => {
@@ -21,7 +21,7 @@ const getProduct = (req, res) => {
         return res.status(404).json({ error: "Produto não encontrado!!" });
     }
     
-    res.json(products[productIndex]);
+    res.status(200).json(products[productIndex]);
 
 }
 
@@ -36,7 +36,7 @@ const createProduct = (req, res) => {
 
     const newProduct = { id: nextId++, name, value: formatedValue };
     products.push(newProduct);
-    res.status(200).json(newProduct);
+    res.status(201).json(newProduct);
 }
 
 const updateProduct = (req, res) => {
@@ -52,7 +52,7 @@ const updateProduct = (req, res) => {
     const formatedValue = parseFloat(value).toFixed(2);
 
     products[productIndex] = { ...products[productIndex], name, value: formatedValue };
-    res.json({ message: `Produto com ID ${productId} atualizado` });
+    res.status(200).json({ message: `Produto com ID ${productId} atualizado` });
 }
 
 const deleteProduct = (req, res) => {
@@ -61,7 +61,7 @@ const deleteProduct = (req, res) => {
     //Cria um novo array excluindo o ID selecionado
     products = products.filter((product) => product.id !== productId);
 
-    res.json({ message: `Produto com ID ${productId} removido!!` });
+    res.status(204).json({ message: `Produto com ID ${productId} removido!!` });
 }
 
 

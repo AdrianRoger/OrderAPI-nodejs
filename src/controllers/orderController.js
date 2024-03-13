@@ -15,7 +15,7 @@ const getAllOrders = (req, res) => {
         resOrders.push(formatOrder(order));
     })
 
-    res.json(resOrders);
+    res.status(404).json(resOrders);
 };
 
 const getOrder = (req, res) => {
@@ -23,10 +23,10 @@ const getOrder = (req, res) => {
     const orderIndex = orders.findIndex((order) => order.id === orderId);
 
     if (orderIndex === -1) {
-        return res.json({ error: "Pedido não encontrado!!" })
+        return res.status(404).json({ error: "Pedido não encontrado!!" });
     }
 
-    res.json(formatOrder(orders[orderIndex]));
+    res.status(200).json(formatOrder(orders[orderIndex]));
 }
 
 const getOrdersBySearch = (req, res) => {
@@ -43,10 +43,10 @@ const getOrdersBySearch = (req, res) => {
         });
         
         if(resultOrders.length > 0){
-            return res.json(resultOrders);
+            return res.status(200).json(resultOrders);
         }
 
-        return res.json({error:"Nenhum pedido encontrado."});
+        return res.status(404).json({error:"Nenhum pedido encontrado."});
     }
 
     if (customerId) {
@@ -57,13 +57,13 @@ const getOrdersBySearch = (req, res) => {
         })
 
         if(resultOrders.length > 0){
-            return res.json(resultOrders);
+            return res.status(200).json(resultOrders);
         }
     
-        return res.json({ error: "Nenhum pedido encontrado." });
+        return res.status(404).json({ error: "Nenhum pedido encontrado." });
     }
 
-    res.json({ error: "Parâmetro de pesquisa incorreto!" });
+    res.status(400).json({ error: "Parâmetro de pesquisa incorreto!" });
 }
 
 const createOrder = (req, res) => {
@@ -71,7 +71,7 @@ const createOrder = (req, res) => {
 
     const newOrder = { id: nextId++, customer: customer, items: items };
     orders.push(newOrder);
-    res.json({ message: "Pedido criado com sucesso!" });
+    res.status(201).json({ message: "Pedido criado com sucesso!" });
 }
 
 const updateOrder = (req, res) => {
@@ -80,11 +80,11 @@ const updateOrder = (req, res) => {
 
     const orderIndex = orders.findIndex(order => order.id === orderId);
     if (orderIndex === -1) {
-        return res.json({ error: "Pedido não encontrado!" });
+        return res.status(404).json({ error: "Pedido não encontrado!" });
     }
 
     orders[orderIndex] = { ...orders[orderIndex], customer, items };
-    res.json({ message: `Pedido com ID ${orderId} atualizado com sucesso.` });
+    res.status(200).json({ message: `Pedido com ID ${orderId} atualizado com sucesso.` });
 }
 
 const deleteOrder = (req, res) => {
@@ -92,11 +92,11 @@ const deleteOrder = (req, res) => {
 
     const orderIndex = orders.findIndex(order => order.id === orderId);
     if (orderIndex === -1) {
-        return res.json({ error: "Pedido não encontrado!" });
+        return res.status(404).json({ error: "Pedido não encontrado!" });
     }
 
     orders = orders.filter(order => order.id !== orderId);
-    res.json({ message: `Pedido com ID ${orderId} deletado com sucesso.` });
+    res.status(204).json({ message: `Pedido com ID ${orderId} deletado com sucesso.` });
 }
 
 
