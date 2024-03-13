@@ -1,4 +1,3 @@
-const { products } = require('./productController');
 const formatOrder = require('../Utils/formatOrder');
 
 let orders = [
@@ -70,22 +69,6 @@ const getOrdersBySearch = (req, res) => {
 const createOrder = (req, res) => {
     const { customer, items } = req.body;
 
-    if (items.length === 0) {
-        return res.json({ error: "Dados insuficientes!!" });
-    }
-
-    const nonExistingProducts = [];
-    items.forEach(item => {
-        const ref = products.findIndex(product => product.id === item.id);
-        if (ref === -1) {
-            nonExistingProducts.push(item.id);
-        }
-    });
-
-    if (nonExistingProducts.length > 0) {
-        return res.json({ error: `Produtos com IDs ${nonExistingProducts.join(',')} não cadastrados.` });
-    }
-
     const newOrder = { id: nextId++, customer: customer, items: items };
     orders.push(newOrder);
     res.json({ message: "Pedido criado com sucesso!" });
@@ -98,22 +81,6 @@ const updateOrder = (req, res) => {
     const orderIndex = orders.findIndex(order => order.id === orderId);
     if (orderIndex === -1) {
         return res.json({ error: "Pedido não encontrado!" });
-    }
-
-    if (items.length === 0) {
-        return res.json({ error: "Dados insuficientes!!" });
-    }
-
-    const nonExistingProducts = [];
-    items.forEach(item => {
-        const ref = products.findIndex(product => product.id === item.id);
-        if (ref === -1) {
-            nonExistingProducts.push(item.id);
-        }
-    });
-
-    if (nonExistingProducts.length > 0) {
-        return res.json({ error: `Produtos com IDs ${nonExistingProducts.join(',')} não cadastrados.` });
     }
 
     orders[orderIndex] = { ...orders[orderIndex], customer, items };

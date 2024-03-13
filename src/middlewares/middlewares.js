@@ -1,4 +1,5 @@
 const { customers } = require('../controllers/customerController');
+const { products } = require('../controllers/productController');
 
 const isInteger = (req, res, next) => {
     const id = req.params.id;
@@ -62,9 +63,40 @@ const checkAssociatedCustomer = (req, res, next) => {
     next();
 }
 
+const checkProductsArray = (req, res, next) => {
+    const { items } = req.body;
+
+    if(!items){
+        return res.json({error : "O atributo items é obrigatório"});
+    }
+
+    if (!Array.isArray(items)) {
+        return res.json({ error: 'O atributo items deve ser um array.' });
+    }
+
+    if (items.length === 0) {
+        return res.json({ error: "O pedido deve conter pelo menos 1 item." });
+    }
+
+    const nonExistingProducts = [];
+    items.forEach(item => {
+        const ref = products.findIndex(product => product.id === item.id);
+        if (ref === -1) {
+            nonExistingProducts.push(item.id);
+        }
+    });
+
+    if (nonExistingProducts.length > 0) {
+        return res.json({ error: `Produtos com IDs ${nonExistingProducts.join(',')} não cadastrados.` });
+    }
+
+    next();
+}
+
 module.exports = {
     isInteger,
     isValidName,
     isValidDecimalFormat,
-    checkAssociatedCustomer
+    checkAssociatedCustomer,
+    checkProductsArray
 };

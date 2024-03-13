@@ -1,8 +1,15 @@
-const { isInteger, isValidName, isValidDecimalFormat, checkAssociatedCustomer } = require('./middlewares');
+const { 
+    isInteger, 
+    isValidName, 
+    isValidDecimalFormat, 
+    checkAssociatedCustomer, 
+    checkProductsArray 
+} = require('./middlewares');
 
 module.exports = {
     isInteger,
     isValidName,
     isValidDecimalFormat,
-    checkAssociatedCustomer
+    checkAssociatedCustomer,
+    checkProductsArray
 }
