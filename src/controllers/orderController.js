@@ -1,5 +1,6 @@
 const { products } = require('./productController');
 const { customers } = require('./customerController');
+const formatOrder = require('../Utils/formatOrder');
 
 let orders = [
     { id: 1, customer: 1, items: [{ id: 1, quantity: 3 }, { id: 3, quantity: 2 }] },
@@ -13,15 +14,7 @@ const getAllOrders = (req, res) => {
     let resOrders = [];
 
     orders.forEach(order => {
-        const customerIndex = customers.findIndex(cus => cus.id === order.customer);
-        const customer = customers[customerIndex];
-        let orderItems = [];
-
-        order.items.forEach(item => {
-            const prodIndex = products.findIndex(prod => prod.id === item.id);
-            orderItems.push({ product: products[prodIndex], quantity: item.quantity });
-        })
-        resOrders.push({ id: order.id, customer: customer, items: orderItems });
+        resOrders.push(formatOrder(order));
     })
 
     res.json(resOrders);
@@ -35,17 +28,44 @@ const getOrder = (req, res) => {
         return res.json({ error: "Pedido não encontrado!!" })
     }
 
-    const customerIndex = customers.findIndex(cus => cus.id === orders[orderIndex].customer);
-    const customer = customers[customerIndex];
+    res.json(formatOrder(orders[orderIndex]));
+}
 
-    let orderItems = [];
-    orders[orderIndex].items.forEach(item => {
-        const prodIndex = products.findIndex(prod => prod.id === item.id);
-        orderItems.push({ product: products[prodIndex], quantity: item.quantity });
-    })
+const getOrdersBySearch = (req, res) => {
+    const produtctId = parseInt(req.query.product_id);
+    const customerId = parseInt(req.query.customer_id);
+    let resultOrders = [];
 
-    let resOrder = { id: orderId, customer: customer, items: orderItems }
-    res.json(resOrder);
+    if (produtctId) {
+        orders.forEach(order => {
+            const index = order.items.findIndex(item => item.id === produtctId);
+            if(index !== -1){
+                resultOrders.push(formatOrder(order));
+            }
+        });
+        
+        if(resultOrders.length > 0){
+            return res.json(resultOrders);
+        }
+
+        return res.json({error:"Nenhum pedido encontrado."});
+    }
+
+    if (customerId) {
+        orders.forEach(order =>{
+            if(order.customer === customerId){
+                resultOrders.push(formatOrder(order));
+            }
+        })
+
+        if(resultOrders.length > 0){
+            return res.json(resultOrders);
+        }
+    
+        return res.json({ error: "Nenhum pedido encontrado." });
+    }
+
+    res.json({ error: "Parâmetro de pesquisa incorreto!" });
 }
 
 const createOrder = (req, res) => {
@@ -127,6 +147,7 @@ const deleteOrder = (req, res) => {
 module.exports = {
     getAllOrders,
     getOrder,
+    getOrdersBySearch,
     createOrder,
     updateOrder,
     deleteOrder
