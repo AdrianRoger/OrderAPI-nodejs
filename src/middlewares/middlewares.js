@@ -23,7 +23,30 @@ const isValidName = (req, res, next) => {
     next();
 };
 
+const isValidDecimalFormat = (req, res, next) => {
+    const { value } = req.body;
+
+    if(!value){
+        return res.json({error:'O atributo value é obrigatório.'});
+    }
+
+    if (value === undefined || isNaN(value)) {
+        return res.status(400).json({ error: 'O valor deve ser um número.' });
+    }
+
+    if (!/^\d+(\.\d{2})$/.test(value)) {
+        return res.status(400).json({ error: 'O valor deve ter duas casas decimais.' });
+    }
+
+    if (/^\d+(\,\d{2})$/.test(value)) {
+        return res.status(400).json({ error: 'A separação das casas decimais deve ser feita com ponto.' });
+    }
+
+    next();
+}
+
 module.exports = {
     isInteger,
-    isValidName
+    isValidName,
+    isValidDecimalFormat
 };
