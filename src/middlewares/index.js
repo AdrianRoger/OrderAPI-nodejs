@@ -8,6 +8,7 @@ const {
 } = require('./middlewares');
 
 const frameGuardMiddleware  = require('./frameGuardMiddleware');
+const corsMiddleware = require('./corsMiddleware');
 
 module.exports = {
     isInteger,
@@ -16,5 +17,6 @@ module.exports = {
     checkAssociatedCustomer,
     checkProductsArray,
     isValidEmail,
-    frameGuardMiddleware
+    frameGuardMiddleware,
+    corsMiddleware
 }

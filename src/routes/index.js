@@ -3,7 +3,7 @@ const router = express.Router();
 const productRoutes = require('./productRoutes');
 const orderRoutes = require('./orderRoutes');
 const customerRoutes = require('./customerRoutes');
-const { frameGuardMiddleware } = require('../middlewares')
+const { frameGuardMiddleware } = require('../middlewares');
 
 
 router.use(frameGuardMiddleware);
