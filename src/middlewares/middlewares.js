@@ -1,8 +1,10 @@
+const { customers } = require('../controllers/customerController');
+
 const isInteger = (req, res, next) => {
     const id = req.params.id;
 
-    if(!/^\d+$/.test(id)) {
-        return res.json({error: "O id dev ser um número inteiro"});
+    if (!/^\d+$/.test(id)) {
+        return res.json({ error: "O id dev ser um número inteiro" });
     }
 
     next();
@@ -26,8 +28,8 @@ const isValidName = (req, res, next) => {
 const isValidDecimalFormat = (req, res, next) => {
     const { value } = req.body;
 
-    if(!value){
-        return res.json({error:'O atributo value é obrigatório.'});
+    if (!value) {
+        return res.json({ error: 'O atributo value é obrigatório.' });
     }
 
     if (value === undefined || isNaN(value)) {
@@ -45,8 +47,24 @@ const isValidDecimalFormat = (req, res, next) => {
     next();
 }
 
+const checkAssociatedCustomer = (req, res, next) => {
+    const { customer } = req.body;
+
+    if (!customer) {
+        return res.json({ error: "O atributo customer é obrigatório." });
+    }
+
+    const customerIndex = customers.findIndex(cus => cus.id === customer);
+    if (customerIndex === -1) {
+        return res.json({ error: "Cliente não cadastrado" });
+    }
+
+    next();
+}
+
 module.exports = {
     isInteger,
     isValidName,
-    isValidDecimalFormat
+    isValidDecimalFormat,
+    checkAssociatedCustomer
 };

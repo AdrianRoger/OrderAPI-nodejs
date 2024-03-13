@@ -1,5 +1,4 @@
 const { products } = require('./productController');
-const { customers } = require('./customerController');
 const formatOrder = require('../Utils/formatOrder');
 
 let orders = [
@@ -71,11 +70,6 @@ const getOrdersBySearch = (req, res) => {
 const createOrder = (req, res) => {
     const { customer, items } = req.body;
 
-    const customerIndex = customers.findIndex(cus => cus.id === customer);
-    if (customerIndex === -1) {
-        return res.json({ error: "Cliente não encontrado" });
-    }
-
     if (items.length === 0) {
         return res.json({ error: "Dados insuficientes!!" });
     }
@@ -104,11 +98,6 @@ const updateOrder = (req, res) => {
     const orderIndex = orders.findIndex(order => order.id === orderId);
     if (orderIndex === -1) {
         return res.json({ error: "Pedido não encontrado!" });
-    }
-
-    const customerIndex = customers.findIndex(cus => cus.id === customer);
-    if (customerIndex === -1) {
-        return res.json({ error: "Cliente não encontrado" });
     }
 
     if (items.length === 0) {
