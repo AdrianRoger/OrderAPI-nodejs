@@ -9,6 +9,7 @@ const {
 
 const frameGuardMiddleware  = require('./frameGuardMiddleware');
 const corsMiddleware = require('./corsMiddleware');
+const { isLogged,checkAdminPermission } = require('./sessionMiddlewares');
 
 module.exports = {
     isInteger,
@@ -18,5 +19,7 @@ module.exports = {
     checkProductsArray,
     isValidEmail,
     frameGuardMiddleware,
-    corsMiddleware
+    corsMiddleware,
+    isLogged,
+    checkAdminPermission
 }
