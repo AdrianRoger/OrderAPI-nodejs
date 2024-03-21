@@ -13,13 +13,13 @@ router.get('/all',  userController.getAllUsers);
 router.post('/', userController.createUser);
 
 //Obtém os dados de login do usuário com username = ‘:username’ 
-router.get('/:username', userController.getUserByUsername);
+// router.get('/:username', userController.getUserByUsername);
 
-//Atualiza os dados do usuário = ‘:username’
-router.put('/:username',  userController.updateUser);
+//Atualiza os dados do usuário = ‘:id’
+router.put('/:id',  userController.updateUser);
 
-//Apaga os dados do usuário = ‘:username’
-router.delete('/:username',  userController.deleteUser);
+//Apaga os dados do usuário = ‘:id’
+router.delete('/:id',  userController.deleteUser);
 
 
 module.exports = router;

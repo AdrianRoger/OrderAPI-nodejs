@@ -14,7 +14,7 @@ const isLogged = (req, res, next) => {
         if (err) {
             return res.status(403).json({ error: "Token JWT inválido!" });
         } else {
-            req.user = decoded.user
+            req.user = decoded.user;
             next();
         }
     });
