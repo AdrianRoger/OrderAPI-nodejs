@@ -13,7 +13,7 @@ router.get('/all',  userController.getAllUsers);
 router.post('/', userController.createUser);
 
 //Obtém os dados de login do usuário com username = ‘:username’ 
-// router.get('/:username', userController.getUserByUsername);
+router.get('/:id', userController.getUserById);
 
 //Atualiza os dados do usuário = ‘:id’
 router.put('/:id',  userController.updateUser);

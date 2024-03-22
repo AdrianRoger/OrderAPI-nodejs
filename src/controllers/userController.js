@@ -1,9 +1,8 @@
-const Database = require('../database');
-const db = new Database('users');
-const crypto = require('crypto');
+const { Users } = require('../database');
+const db = new Users('users');
 const hashPassword = require('../Utils/hashPassword');
 
-//api/user/all(admin/GET)
+//api/users/all (admin/GET)
 const getAllUsers = (req, res) => {
     db.readAllData((err, data)=>{
         if(err){
@@ -13,7 +12,7 @@ const getAllUsers = (req, res) => {
     });
 }
 
-//rota user/ (admin/POST)
+//users/ (admin/POST)
 const createUser = async (req, res) => {
     const { username, name, password, userType }  = req.body;
     if(!username || !name || !password || !userType ){
@@ -28,36 +27,35 @@ const createUser = async (req, res) => {
             res.status(500).json({ error: "Erro ao criar usuário."});
             return;
         }
-        res.status(201).json(newUser);
+        res.status(201).json({id: id, ...newUser});
     });
 }
 
-//api/login/:username(admin/GET)
-// const getUserByUsername = (req, res) => {
-//     const username = req.params.username;
-//
-//     if (!username) {
-//         return res.status(400).json({ error: "Parâmetro incorreto." });
-//     }
-//
-//     const index = dbUsers.findIndex(user => user.username === username);
-//     if (index === -1) {
-//         return res.status(404).json({ error: "Usuário não encontrado." });
-//     }
-//
-//     res.status(200).json(dbUsers[index]);
-// }
+//api/users/:id(admin/GET)
+const getUserById = (req, res) => {
+    const id = req.params.id;
+    if (!id) {
+        return res.status(400).json({ error: "Parâmetro incorreto." });
+    }
+    db.get(id, (err, value) => {
+        if(err){
+            return res.status(404).json({ error : "Usuário não encontrado!"})
+        }
+        const data = JSON.parse(value.toString())
+        res.status(200).json({id:id, ...data});
+    });
+}
 
-//api/login/:username(admin/PUT)
+//api/users/:id(admin/PUT)
 const updateUser = async (req, res) => {
     const id = req.params.id;
-    const { newUsername, name, password, userType } = req.body;
+    const { username, name, password, userType } = req.body;
 
     if (!id) {
         return res.status(400).json({ error: "Parâmetro incorreto." });
     }
 
-    if (!newUsername || !name || !password || !userType) {
+    if (!username || !name || !password || !userType) {
         return res.status(400).json({ error: "Dados incompletos para atualizar usuário." });
     }
     const hashedPassword = await hashPassword(password);
@@ -66,7 +64,7 @@ const updateUser = async (req, res) => {
             return res.status(404).json({ error: "Usuário não encontrado." });
         }
 
-        const updatedUser = { username: newUsername, name: name, password: hashedPassword, user_type: userType };
+        const updatedUser = { username: username, name: name, password: hashedPassword, user_type: userType };
         db.put(id, JSON.stringify(updatedUser), (err) =>{
             if(err){
                 return res.status(500).json({error : 'Erro ao atualizar usuário.' });
@@ -76,7 +74,7 @@ const updateUser = async (req, res) => {
     });
 };
 
-//api/login:username(admin/DELETE)
+//api/users/:id(admin/DELETE)
 const deleteUser = (req, res) => {
     const id = req.params.id;
 
@@ -96,7 +94,7 @@ const deleteUser = (req, res) => {
 module.exports = {
     getAllUsers,
     createUser,
-    // getUserByUsername,
+    getUserById,
     updateUser,
     deleteUser
 }
