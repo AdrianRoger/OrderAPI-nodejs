@@ -1,7 +1,7 @@
 const RocksDB  = require('rocksdb');
 const path = require('path');
 
-class Users {
+class Database {
     constructor(dbName){
         this.dbPath = path.resolve(__dirname, '../../db_data', dbName);
         this.db = null;
@@ -45,16 +45,7 @@ class Users {
                     return;
                 }
 
-                const temp = JSON.parse(value.toString());
-                const result = {
-                    id : key.toString(),
-                    username : temp.username,
-                    name : temp.name,
-                    password : temp.password,
-                    user_type : temp.user_type
-                }
-
-                data.push(result);
+                data.push({ id : key.toString(), ...JSON.parse(value.toString()) });
                 loop();
             });
         }
@@ -83,5 +74,5 @@ class Users {
     }
 }
 
-module.exports = Users;
+module.exports = Database;
 

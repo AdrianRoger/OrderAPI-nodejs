@@ -1,4 +1,3 @@
-const dbUsers = require('../database/dbUsers');
 require('dotenv').config();
 const secretKey = process.env.SECRET_KEY;
 const jwt = require('jsonwebtoken');

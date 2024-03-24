@@ -33,7 +33,7 @@ const isValidDecimalFormat = (req, res, next) => {
         return res.status(400).json({ error: 'O atributo value é obrigatório.' });
     }
 
-    if (value === undefined || isNaN(value)) {
+    if (isNaN(value)) {
         return res.status(400).json({ error: 'O valor deve ser um número.' });
     }
 

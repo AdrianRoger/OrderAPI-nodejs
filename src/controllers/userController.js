@@ -1,5 +1,5 @@
-const { Users } = require('../database');
-const db = new Users('users');
+const Database = require('../database/Database');
+const db = new Database('users');
 const hashPassword = require('../Utils/hashPassword');
 
 //api/users/all (admin/GET)
@@ -41,15 +41,16 @@ const getUserById = (req, res) => {
         if(err){
             return res.status(404).json({ error : "Usuário não encontrado!"})
         }
-        const data = JSON.parse(value.toString())
-        res.status(200).json({id:id, ...data});
+
+        res.status(200).json({id:id, ...JSON.parse(value.toString())});
     });
 }
 
 //api/users/:id(admin/PUT)
 const updateUser = async (req, res) => {
     const id = req.params.id;
-    const { username, name, password, userType } = req.body;
+    const { username, name, password } = req.body;
+    const userType = req.body.user_type;
 
     if (!id) {
         return res.status(400).json({ error: "Parâmetro incorreto." });
@@ -79,15 +80,21 @@ const deleteUser = (req, res) => {
     const id = req.params.id;
 
     if (!id) {
-        return res.status(400).json({ error: "Parâmetro username obrigatório." });
+        return res.status(400).json({ error: "Parâmetro id na URL inválido." });
     }
 
-    db.del(id, (err) =>{
+    db.get(id, (err, data) =>{
         if(err){
-            return res.status(500).json({ error: 'Erro ao excluir usuário'});
+            return res.status(500).json({ error : "Usuário nao encontrado!"});
         }
-        res.status(200).json({message : `Usuário com id ${id} excluído.`});
-    })
+
+        db.del(id, (err) =>{
+            if(err){
+                return res.status(500).json({ error: 'Erro ao excluir usuário' });
+            }
+            res.status(200).json({ message : `Usuário com id ${id} excluído.` });
+        });
+    });
 }
 
 

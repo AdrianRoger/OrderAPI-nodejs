@@ -6,68 +6,98 @@ let products = [
     { id: 5, name: 'melancia', value: "5.00"}
 ];
 
-let nextId = products.length + 1;
+const Database = require('../database/Database');
+const db = new Database('products');
 
 const getAllProducts = (req, res) => {
-    res.status(200).json(products);
+    db.readAllData( (err, data)=>{
+        if(err){
+            return res.status(500).json({ error : "Erro ao buscar produtos!"})
+        }
+    res.status(200).json(data);
+    })
 }
 
-const getProduct = (req, res) => {
+const getProductById = (req, res) => {
     const productId = parseInt(req.params.id);
 
-    const productIndex = products.findIndex((prod) => prod.id === productId);
-
-    if (productIndex === -1) {
-        return res.status(404).json({ error: "Produto não encontrado!!" });
-    }
-    
-    res.status(200).json(products[productIndex]);
-
+    db.get(productId, (err, value)=>{
+        if(err){
+            return res.status(500).json({ error : 'Produto não encontrado.'})
+        }
+        res.status(200).json({id: productId, ...JSON.parse(value.toString())});
+    });
 }
 
 const createProduct = (req, res) => {
     const { name, value } = req.body;
-
     if (!name || !value) {
         return res.status(400).json({ error: "Dados insuficientes!!" });
     }
 
-    const formatedValue = parseFloat(value).toFixed(2);
+    const sanitizedValue = parseFloat(value).toFixed(2);
+    const newProduct = { name, value: sanitizedValue };
+    let nextId;
+    db.readAllData( (err, data)=>{
+        if(err){
+            return res.status(500).json({ error : "Erro ao buscar produtos!"})
+        }
+        nextId = data.length > 0 ? Number(data[data.length -1].id) + 1 : 1;
 
-    const newProduct = { id: nextId++, name, value: formatedValue };
-    products.push(newProduct);
-    res.status(201).json(newProduct);
+        db.put(nextId, JSON.stringify(newProduct), (err)=>{
+          if(err){
+              return res.status(500).json({ error : err});
+          }
+          res.status(201).json({ id : nextId, ...newProduct });
+        });
+    });
 }
 
 const updateProduct = (req, res) => {
     const productId = parseInt(req.params.id);
     const { name, value } = req.body;
+    const sanitizedValue = parseFloat(value).toFixed(2);
 
-    const productIndex = products.findIndex((product) => product.id === productId);
+    db.get(productId, (err, value)=>{
+        if(err){
+            return res.status(500).json({ error : 'Produto não encontrado.'})
+        }
 
-    if (productIndex === -1) {
-        return res.status(404).json({ error: "Produto Não econtrado!!" });
-    }
+        const updatedProduct = { name, value : sanitizedValue };
 
-    const formatedValue = parseFloat(value).toFixed(2);
-
-    products[productIndex] = { ...products[productIndex], name, value: formatedValue };
-    res.status(200).json({ message: `Produto com ID ${productId} atualizado` });
+        db.put(productId, JSON.stringify(updatedProduct), (err) =>{
+           if(err){
+               return res.status(500).json({ error : "Erro ao atualizar o produto!"})
+           }
+           res.status(200).json({ message : `Produto com id ${productId} atualizado!`})
+        });
+    });
 }
 
 const deleteProduct = (req, res) => {
-    const productId = parseInt(req.params.id);
+    const id = req.params.id;
+    if(!id){
+        return res.status(400).json({ error : "Parâmetro id na URL incorreto!"});
+    }
 
-    //Cria um novo array excluindo o ID selecionado
-    products = products.filter((product) => product.id !== productId);
+    db.get(id, (err, data) =>{
+        if(err){
+            return res.status(500).json({ error : "Produto nao encontrado!"});
+        }
 
-    res.status(204).json({ message: `Produto com ID ${productId} removido!!` });
+        db.del(id, (err) =>{
+            if(err){
+                return res.status(500).json({ error: 'Erro ao excluir produto' });
+            }
+            res.status(200).json({ message : `Produto com id ${id} excluído.` });
+        });
+    });
 }
 
 
 module.exports = {
     getAllProducts,
-    getProduct,
+    getProductById,
     createProduct,
     updateProduct,
     deleteProduct,
