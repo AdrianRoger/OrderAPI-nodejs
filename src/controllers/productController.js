@@ -46,7 +46,7 @@ const createProduct = (req, res) => {
 
         db.put(nextId, JSON.stringify(newProduct), (err)=>{
           if(err){
-              return res.status(500).json({ error : err});
+              return res.status(500).json({ error : "Erro ao cadastrar produto!"});
           }
           res.status(201).json({ id : nextId, ...newProduct });
         });
