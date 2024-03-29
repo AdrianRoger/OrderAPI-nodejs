@@ -6,94 +6,68 @@ let products = [
     { id: 5, name: 'melancia', value: "5.00"}
 ];
 
-const Database = require('../database/Database');
-const db = new Database('products');
+const {
+    getAllProductsService, getProductByIdService,
+    createProductService, updateProductService, deleteProductService,
+} = require('../services');
 
-const getAllProducts = (req, res) => {
-    db.readAllData( (err, data)=>{
-        if(err){
-            return res.status(500).json({ error : "Erro ao buscar produtos!"})
-        }
-    res.status(200).json(data);
-    })
-}
 
-const getProductById = (req, res) => {
-    const productId = parseInt(req.params.id);
-
-    db.get(productId, (err, value)=>{
-        if(err){
-            return res.status(500).json({ error : 'Produto não encontrado.'})
-        }
-        res.status(200).json({id: productId, ...JSON.parse(value.toString())});
-    });
-}
-
-const createProduct = (req, res) => {
-    const { name, value } = req.body;
-    if (!name || !value) {
-        return res.status(400).json({ error: "Dados insuficientes!!" });
+const getAllProducts = async (req, res) => {
+    try {
+        const data = await getAllProductsService();
+        res.status(200).json(data);
+    }catch(error){
+        return res.status(500).json(error);
     }
+}
 
+const getProductById = async (req, res) => {
+    const productId = parseInt(req.params.id);
+    try{
+        const data = await getProductByIdService(productId);
+        res.status(200).json(data);
+    }catch(error){
+        return res.status(404).json({ error : "Produto não encontrado!"});
+    }
+}
+
+const createProduct = async (req, res) => {
+    const { name, value } = req.body;
+    //verificação dos dados está sendo feita no middleware
     const sanitizedValue = parseFloat(value).toFixed(2);
     const newProduct = { name, value: sanitizedValue };
-    let nextId;
-    db.readAllData( (err, data)=>{
-        if(err){
-            return res.status(500).json({ error : "Erro ao buscar produtos!"})
-        }
-        nextId = data.length > 0 ? Number(data[data.length -1].id) + 1 : 1;
 
-        db.put(nextId, JSON.stringify(newProduct), (err)=>{
-          if(err){
-              return res.status(500).json({ error : "Erro ao cadastrar produto!"});
-          }
-          res.status(201).json({ id : nextId, ...newProduct });
-        });
-    });
+    try{
+        const data = await createProductService(newProduct);
+        res.status(201).json(data);
+    }catch(error){
+        res.status(500).json({error : "Erro ao cadastrar novo cliente!"});
+    }
 }
 
-const updateProduct = (req, res) => {
+const updateProduct = async (req, res) => {
     const productId = parseInt(req.params.id);
     const { name, value } = req.body;
     const sanitizedValue = parseFloat(value).toFixed(2);
 
-    db.get(productId, (err, value)=>{
-        if(err){
-            return res.status(500).json({ error : 'Produto não encontrado.'})
-        }
-
-        const updatedProduct = { name, value : sanitizedValue };
-
-        db.put(productId, JSON.stringify(updatedProduct), (err) =>{
-           if(err){
-               return res.status(500).json({ error : "Erro ao atualizar o produto!"})
-           }
-           res.status(200).json({ message : `Produto com id ${productId} atualizado!`})
-        });
-    });
-}
-
-const deleteProduct = (req, res) => {
-    const id = req.params.id;
-    if(!id){
-        return res.status(400).json({ error : "Parâmetro id na URL incorreto!"});
+    try{
+        const data = await updateProductService(productId, { name : name, value : sanitizedValue } );
+        return res.status(200).json(data);
+    }catch(error){
+        return res.status(500).json({error : "Erro ao atualizar produto!"});
     }
+};
 
-    db.get(id, (err, data) =>{
-        if(err){
-            return res.status(500).json({ error : "Produto nao encontrado!"});
-        }
+const deleteProduct = async (req, res) => {
+    const productId = req.params.id || null;
 
-        db.del(id, (err) =>{
-            if(err){
-                return res.status(500).json({ error: 'Erro ao excluir produto' });
-            }
-            res.status(200).json({ message : `Produto com id ${id} excluído.` });
-        });
-    });
-}
-
+    try{
+        const data = await deleteProductService(productId);
+        return res.status(200).json(data);
+    }catch(error){
+        return res.status(500).json(error);
+    }
+};
 
 module.exports = {
     getAllProducts,

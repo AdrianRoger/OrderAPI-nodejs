@@ -15,9 +15,6 @@ const {
 const getAllCustomers = async (req, res) => {
         try {
             const data = await getAllCustomersService();
-            if(data.length === 0){
-                return res.status(200).json();
-            }
             res.status(200).json(data);
         }catch(error){
             return res.status(500).json(error);

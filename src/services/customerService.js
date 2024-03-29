@@ -7,6 +7,7 @@ const getAllCustomersService = async () => {
 			if(err){
 				reject({ error: "Erro ao buscar clientes!" });
 			}else{
+				data.sort((a, b) => parseInt(a.id) - parseInt(b.id));
 				resolve(data);
 			}
 		});
@@ -51,7 +52,7 @@ const updateCustomerService = async (id, updatedCustomer) => {
 		return await new Promise((resolve, reject) => {
 			db.put(id, JSON.stringify(updatedCustomer), (err) =>{
 				if(err){
-					reject({error : "Erro so atualizar cliente!" });
+					reject({error : "Erro ao atualizar cliente!" });
 				}else{
 					resolve({id, ...updatedCustomer});
 				}
