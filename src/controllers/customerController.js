@@ -4,97 +4,76 @@ let customers = [
     { id: 3, name: "Tony Stark", email: "tonystark@avengers.com" }
 ]
 
-const Database = require('../database/Database');
-const db = new Database('customers');
+const {
+    getAllCustomersService,
+    getCustomerByIdService,
+    createCustomerService,
+    updateCustomerService,
+    deleteCustomerService
+} = require('../services');
 
-const getAllCustomers = (req, res) => {
-    db.readAllData( (err, data)=>{
-        if(err){
-            return res.status(500).json({ error : "Erro ao buscar clientes!"});
+const getAllCustomers = async (req, res) => {
+        try {
+            const data = await getAllCustomersService();
+            if(data.length === 0){
+                return res.status(200).json();
+            }
+            res.status(200).json(data);
+        }catch(error){
+            return res.status(500).json(error);
         }
-
-        if(data.length === 0){
-            return res.status(404).json({ error : "Nenhum Cliente cadastrado!"});
-        }
-
-        res.status(200).json(data);
-    })
 }
 
-const getCustomerById = (req, res) => {
+const getCustomerById = async (req, res) => {
     const customerId = req.params.id;
-
-    db.get(customerId, (err, data)=>{
-        // console.log(value);
-        if(err) {
-            return res.status(500).json({error: 'Cliente não encontrado.'})
-        }
-
-        res.status(200).json({id: customerId, ...JSON.parse(data.toString())});
-    });
+    try{
+        const data = await getCustomerByIdService(customerId);
+        res.status(200).json(data);
+    }catch(error){
+        return res.status(404).json({ error : "Cliente não encontrado!"});
+    }
 }
 
-const createCustomer = (req, res) => {
+const createCustomer = async (req, res) => {
     const { name, email } = req.body;
     if (!name || !email) {
-        return res.status(400).json({ error: "Dados insuficientes!" });
+        return res.status(400).json({ error: "Nome e Email são obrigatórios!" });
     }
+
     const newCustomer = { name: name, email: email };
 
-    let nextId;
-    db.readAllData( (err, data)=>{
-        if(err){
-            return res.status(500).json({ error : "Erro ao buscar produtos!"})
-        }
-        nextId = data.length > 0 ? Number(data[data.length -1].id) + 1 : 1;
+    try{
+        const data = await createCustomerService(newCustomer);
+        res.status(201).json(data);
+    }catch(error){
+        res.status(500).json({error : "Erro ao cadastrar novo cliente!"});
+    }
+};
 
-        db.put(nextId, JSON.stringify(newCustomer), (err)=>{
-            if(err){
-                return res.status(500).json({ error : "Erro ao cadastrar cliente!"});
-            }
-            res.status(201).json({ id : nextId, ...newCustomer });
-        });
-    });
-}
-
-const updateCustomer = (req, res) => {
+const updateCustomer = async (req, res) => {
     const customerId = parseInt(req.params.id);
     const { name, email } = req.body;
     if (!name || !email) {
         return res.status(400).json({ error: "Dados insuficientes!" });
     }
 
-    db.get(customerId, (err, data)=>{
-        if(err){
-            return res.status(500).json({ error : 'Cliente não encontrado.'});
-        }
+    try{
+        const data = await updateCustomerService(customerId, { name, email } );
+        return res.status(200).json(data);
+    }catch(error){
+        return res.status(500).json({error : "Erro ao atualizar Cliente!"});
+    }
+};
 
-        const updatedCustomer = { name, email };
-        db.put(customerId, JSON.stringify(updatedCustomer), (err) =>{
-            if(err){
-                return res.status(500).json({ error : "Erro ao atualizar o cliente!"});
-            }
-            res.status(200).json({ message: `Cliente com ID ${customerId} atualizado com sucesso` });
-        });
-    });
-}
-
-const deleteCustomer = (req, res) => {
+const deleteCustomer = async (req, res) => {
     const customerId = req.params.id;
-
-    db.get(customerId, (err, data)=>{
-        if(err){
-            return res.status(500).json({ error : 'Cliente não encontrado!'});
-        }
-
-        db.del(customerId, (err) =>{
-            if(err){
-                return res.status(500).json({ error: 'Erro ao excluir cliente!' });
-            }
-            res.status(200).json({ message : `Cliente com id ${customerId} excluído.` });
-        });
-    });
-}
+    try{
+        const data = await deleteCustomerService(customerId);
+        return res.status(200).json(data);
+    }catch(error){
+        return res.status(500).json(error);
+    }
+};
 
 module.exports = {
     getAllCustomers,

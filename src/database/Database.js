@@ -6,7 +6,7 @@ class Database {
         this.dbPath = path.resolve(__dirname, '../../db_data', dbName);
         this.db = null;
         this.open((err) =>{
-            err ? console.error("Erro ao abrir o branco: ", err) : null;
+            err ? console.error("Erro ao abrir o banco: ", err) : null;
         });
     }
 
