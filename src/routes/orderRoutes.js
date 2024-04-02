@@ -7,8 +7,8 @@ router.get('/search', orderController.getOrdersBySearch);
 
 router.get('/', orderController.getAllOrders);
 router.get('/:id', isInteger, orderController.getOrder);
-router.post('/', checkAssociatedCustomer, checkProductsArray, orderController.createOrder);
-router.put('/:id', isInteger, checkAssociatedCustomer, checkProductsArray, orderController.updateOrder);
+router.post('/', orderController.createOrder);
+router.put('/:id', isInteger, orderController.updateOrder);
 router.delete('/:id', isInteger, orderController.deleteOrder);
 
 module.exports = router;

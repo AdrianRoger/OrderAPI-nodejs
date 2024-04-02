@@ -1,104 +1,115 @@
 const formatOrder = require('../Utils/formatOrder');
-
 let orders = [
     { id: 1, customer: 1, items: [{ id: 1, quantity: 3 }, { id: 3, quantity: 2 }] },
     { id: 2, customer: 2, items: [{ id: 2, quantity: 1 }, { id: 1, quantity: 4 }] },
     { id: 3, customer: 3, items: [{ id: 4, quantity: 2 }, { id: 3, quantity: 1 }] }
 ];
 
-let nextId = orders.length + 1;
+const {
+    getAllOrdersService,
+    getOrderByIdService,
+    getOrdersBySearchService,
+    createOrderService,
+    updateOrderService,
+    deleteOrderService
+} = require('../services');
+const {customers} = require("./customerController");
 
-const getAllOrders = (req, res) => {
-    let resOrders = [];
-
-    orders.forEach(order => {
-        resOrders.push(formatOrder(order));
-    })
-
-    res.status(404).json(resOrders);
+const getAllOrders = async (req, res) => {
+    try {
+        const data = await getAllOrdersService();
+        for(const order of data){
+            data[data.indexOf(order)] = await formatOrder(order);
+        }
+        res.status(200).json(data);
+    }catch(error){
+        return res.status(500).json(error);
+    }
 };
 
-const getOrder = (req, res) => {
-    const orderId = parseInt(req.params.id);
-    const orderIndex = orders.findIndex((order) => order.id === orderId);
-
-    if (orderIndex === -1) {
+const getOrder = async (req, res) => {
+    try{
+        const orderId = req.params.id
+        const order = await formatOrder( await getOrderByIdService(orderId));
+        res.status(200).json(order);
+    }catch(error){
         return res.status(404).json({ error: "Pedido não encontrado!!" });
     }
-
-    res.status(200).json(formatOrder(orders[orderIndex]));
 }
 
-const getOrdersBySearch = (req, res) => {
-    const produtctId = parseInt(req.query.product_id);
+const getOrdersBySearch = async (req, res) => {
+    const productId = parseInt(req.query.product_id);
     const customerId = parseInt(req.query.customer_id);
-    let resultOrders = [];
-
-    if (produtctId) {
-        orders.forEach(order => {
-            const index = order.items.findIndex(item => item.id === produtctId);
-            if(index !== -1){
-                resultOrders.push(formatOrder(order));
-            }
-        });
-        
-        if(resultOrders.length > 0){
-            return res.status(200).json(resultOrders);
+    try{
+        let data
+        let searchType;
+        if (productId) {
+            data = await getOrdersBySearchService(1, productId);
+            searchType = 'product';
+        }else if(customerId) {
+            data = await getOrdersBySearchService(2, customerId);
+            searchType = 'customer';
+        }else{
+            return res.status(400).json({ error: "Parâmetro de pesquisa incorreto!" });
         }
 
-        return res.status(404).json({error:"Nenhum pedido encontrado."});
-    }
-
-    if (customerId) {
-        orders.forEach(order =>{
-            if(order.customer === customerId){
-                resultOrders.push(formatOrder(order));
-            }
-        })
-
-        if(resultOrders.length > 0){
-            return res.status(200).json(resultOrders);
+        if(data.error){
+            return res.status(404).json({error:`Nenhum pedido encontrado para o ${searchType} com ID ${productId || customerId}.`});
         }
-    
-        return res.status(404).json({ error: "Nenhum pedido encontrado." });
+
+        for(const order of data){
+            data[data.indexOf(order)] = await formatOrder(order);
+        }
+
+        return res.status(200).json(data);
+    }catch(error){
+        return res.status(400).json({error});
     }
-
-    res.status(400).json({ error: "Parâmetro de pesquisa incorreto!" });
 }
 
-const createOrder = (req, res) => {
-    const { customer, items } = req.body;
-
-    const newOrder = { id: nextId++, customer: customer, items: items };
-    orders.push(newOrder);
-    res.status(201).json({ message: "Pedido criado com sucesso!" });
-}
-
-const updateOrder = (req, res) => {
-    const orderId = parseInt(req.params.id);
-    const { customer, items } = req.body;
-
-    const orderIndex = orders.findIndex(order => order.id === orderId);
-    if (orderIndex === -1) {
-        return res.status(404).json({ error: "Pedido não encontrado!" });
+const createOrder = async (req, res) => {
+    try{
+        const { customer, items } = req.body;
+        const order = await createOrderService({customer, items});
+        res.status(201).json(await formatOrder(order));
+    } catch ( error ){
+        res.status(500).json({ error });
     }
-
-    orders[orderIndex] = { ...orders[orderIndex], customer, items };
-    res.status(200).json({ message: `Pedido com ID ${orderId} atualizado com sucesso.` });
 }
 
-const deleteOrder = (req, res) => {
-    const orderId = parseInt(req.params.id);
-
-    const orderIndex = orders.findIndex(order => order.id === orderId);
-    if (orderIndex === -1) {
-        return res.status(404).json({ error: "Pedido não encontrado!" });
+const updateOrder = async (req, res) => {
+    try{
+        const orderId = parseInt(req.params.id);
+        const { customer, items } = req.body;
+        const updatedOrder = await updateOrderService(orderId, { customer, items });
+        res.status(200).json(await formatOrder(updatedOrder));
+    }catch(error){
+        res.status(500).json({ error });
     }
-
-    orders = orders.filter(order => order.id !== orderId);
-    res.status(204).json({ message: `Pedido com ID ${orderId} deletado com sucesso.` });
+    // res.status(200).json({ message: `Pedido com ID ${orderId} atualizado com sucesso.` });
 }
 
+const deleteOrder = async (req, res) => {
+    const orderId = req.params.id;
+
+    try{
+        const data = await deleteOrderService(orderId);
+        res.status(200).json(data);
+    }catch(error){
+        res.status(404).json(error);
+    }
+}
+
+// const deleteProduct = async (req, res) => {
+//     const productId = req.params.id || null;
+//
+//     try{
+//         const data = await deleteProductService(productId);
+//         return res.status(200).json(data);
+//     }catch(error){
+//         return res.status(500).json(error);
+//     }
+// };
 
 module.exports = {
     getAllOrders,
@@ -108,5 +119,3 @@ module.exports = {
     updateOrder,
     deleteOrder
 };
-
-

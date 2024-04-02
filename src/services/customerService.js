@@ -18,7 +18,7 @@ const getCustomerByIdService = async (id) => {
 	return await new Promise((resolve, reject) => {
 		db.get(id, (err, data) => {
 			if(err){
-			  reject({ error : "Cliente não Encontrado!" });
+			  reject( "Cliente não Encontrado!" );
 			}else{
 			  resolve({id: id, ...JSON.parse(data.toString())});
 			}

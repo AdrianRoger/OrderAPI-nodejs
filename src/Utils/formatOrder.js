@@ -1,14 +1,12 @@
-const { customers } = require('../controllers/customerController');
-const { products } = require('../controllers/productController');
+const { getCustomerByIdService, getAllProductsService  } = require('../services');
 
-
-function formatOrder(order) {
-    const customerIndex = customers.findIndex(cus => cus.id === order.customer);
-    const customer = customers[customerIndex];
+async function formatOrder(order) {
+    const customer = await getCustomerByIdService(order.customer);
+    const products = await getAllProductsService();
 
     let orderItems = [];
     order.items.forEach(item => {
-        const prodIndex = products.findIndex(prod => prod.id === item.id);
+        const prodIndex = products.findIndex(prod => Number(prod.id) === Number(item.id));
         orderItems.push({ product: products[prodIndex], quantity: item.quantity });
     })
 
